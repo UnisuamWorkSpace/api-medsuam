@@ -1,35 +1,75 @@
 <?php
 // src/routes/api.php
 
-// Simulando um roteador simples (você pode usar um pacote como Slim Framework depois)
+// Recupera as variáveis vindos de index.php;
 $requestPath = $path;
 $requestMethod = $method;
+$requestData = $data;
+$requestGetData = null;
 
-// Rota padrão
-if ($requestPath == '/' && $requestMethod == 'GET') {
-    echo json_encode(['message' => 'API MedSuam funcionando!']);
+// Recupera os dados da requisição GET;
+if ($requestMethod == 'GET') {
+    $requestGetData = $_GET;
+}
+
+// Rota padrão ou rota vazia mostra que a API funciona;
+if ($requestPath == '/' || $requestPath == '' && $requestMethod == 'GET') {
+    echo json_encode([
+        'status' => 200,
+        'error' => false,
+        'route' => $requestPath,
+        'method' => $requestMethod,
+        'data' => $requestGetData,
+        'message' => 'API MedSuam funcionando!'
+    ]);
     exit;
 }
 
-// Rotas de Pacientes
-if ($requestPath == '/pacientes' && $requestMethod == 'GET') {
-    $controller = new src\controllers\PacienteController($db);
-    $controller->listar();
-    exit;
-}
+if ($requestMethod == 'GET' && !empty($requestGetData)) {
+    // Rotas de Pacientes;
+    if ($requestPath == '/pacientes' && $requestMethod == 'GET') {
+        echo json_encode([
+            'status' => 200,
+            'error' => false,
+            'route' => $requestPath,
+            'method' => $requestMethod,
+            'data' => $requestGetData,
+            'message' => 'Listagem de pacientes'
+        ]);
+        exit;
+    }
 
-if (preg_match('/^\/pacientes\/(\d+)$/', $requestPath, $matches) && $requestMethod == 'GET') {
-    $controller = new src\controllers\PacienteController($db);
-    $controller->buscarPorId($matches[1]);
-    exit;
-}
-
-if ($requestPath == '/pacientes' && $requestMethod == 'POST') {
-    $controller = new src\controllers\PacienteController($db);
-    $controller->criar();
+    // Rota de Médicos;
+    if ($requestPath == '/medicos' && $requestMethod == 'GET') {
+        echo json_encode([
+            'status' => 200,
+            'error' => false,
+            'route' => $requestPath,
+            'method' => $requestMethod,
+            'data' => $requestGetData,
+            'message' => 'Listagem de médicos'
+        ]);
+        exit;
+    }
+} else{
+    http_response_code(400);
+    echo json_encode([
+        'status' => 400,
+        'error' => true,
+        'route' => $requestPath,
+        'method' => $requestMethod,
+        'data' => $requestGetData,
+        'message' => 'Requisição inválida -> sem parâmetros'
+    ]);
     exit;
 }
 
 // Se nenhuma rota for encontrada
 http_response_code(404);
-echo json_encode(['error' => 'Rota não encontrada']);
+echo json_encode([
+    'status' => 404,
+    'error' => true,
+    'route' => $requestPath,
+    'method' => $requestMethod,
+    'message' => 'Rota não encontrada'
+]);
