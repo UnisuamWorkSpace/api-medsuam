@@ -26,11 +26,15 @@ try {
 
     // Responde com o método e path da requisição;
     echo json_encode([
+        'message' => 'Requisição recebida',
+        'status' => 200,
         'method' => $method,
         'path' => $path,
     ]);
 
     // A partir daqui, implementarei as rotas e os methodos para que funcione a API;
+    if ($method == 'GET' && $path == '/pacientes') {
+    }
 
 } catch (Exception $e) {
     http_response_code(500);
