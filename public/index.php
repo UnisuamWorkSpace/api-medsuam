@@ -1,39 +1,38 @@
 <?php
 // public/index.php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-// Carrega as variáveis de ambiente
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
-
-// Configurações iniciais
-header('Content-Type: application/json; charset=utf-8'); // Define o tipo de conteúdo como JSON UTF-8;
-header('Access-Control-Allow-Origin: *'); // Permite o acesso de qualquer origem (CORS);
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); // Define os métodos permitidos (CORS);
-header('Access-Control-Allow-Headers: Content-Type, Authorization'); // Define os cabeçalhos permitidos (CORS);
-
-// Lidar com preflight requests (CORS)
+// Lidar com preflight requests (CORS);
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 try {
-    // Obtém o método e path da requisição
+    // Tenta recuperar o método da requisição e o path(URL) da requisição;
     $method = $_SERVER['REQUEST_METHOD'];
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $path = str_replace('/api-medsuam', '', $path); // Remove o base path se necessário
+    $path = str_replace('/api-medsuam', '', $path);
+    $path = str_replace('/public', '', $path);
+    $path = str_replace('/index.php', '', $path);
 
-    // Responde com o método e path da requisição;
-    echo json_encode([
-        'message' => 'Requisição recebida',
-        'status' => 200,
-        'method' => $method,
-        'path' => $path,
-    ]);
-
-    // A partir daqui, implementarei as rotas e os methodos para que funcione a API;
-    if ($method == 'GET' && $path == '/pacientes') {
+    // Tenta recuperar os dados da requisição, ou seja o JSON enviado no corpo da requisição pelo front-end;
+    $json = file_get_contents('php://input', true);
+    // Tenta converter o JSON em um array associativo;
+    $data = json_decode($json, true);
+    // Verificando se o método da requisição não for GET e se o Array está vazio;
+    if (!$data && $method != 'GET') {
+        http_response_code(400);
+        echo json_encode([
+            'status' => 400,
+            'error' => 'JSON inválido ou vazio'
+        ]);
+        exit();
+    } else {
+        require_once __DIR__ . '/../src/routes/api.php';
     }
 
 } catch (Exception $e) {
