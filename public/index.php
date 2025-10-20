@@ -8,29 +8,29 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
 // Configurações iniciais
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Content-Type: application/json; charset=utf-8'); // Define o tipo de conteúdo como JSON UTF-8;
+header('Access-Control-Allow-Origin: *'); // Permite o acesso de qualquer origem (CORS);
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); // Define os métodos permitidos (CORS);
+header('Access-Control-Allow-Headers: Content-Type, Authorization'); // Define os cabeçalhos permitidos (CORS);
 
 // Lidar com preflight requests (CORS)
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-
 try {
-    // Inicializa o banco de dados
-    $database = new src\Database();
-    $db = $database->getConnection();
-
     // Obtém o método e path da requisição
     $method = $_SERVER['REQUEST_METHOD'];
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $path = str_replace('/api-medsuam', '', $path); // Remove o base path se necessário
 
-    // Inclui as rotas
-    require_once __DIR__ . '/../src/routes/api.php';
+    // Responde com o método e path da requisição;
+    echo json_encode([
+        'method' => $method,
+        'path' => $path,
+    ]);
+
+    // A partir daqui, implementarei as rotas e os methodos para que funcione a API;
 
 } catch (Exception $e) {
     http_response_code(500);
